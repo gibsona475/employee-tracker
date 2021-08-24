@@ -27,9 +27,9 @@ function init() {
             type: "list",
             message: "What would you like to do?",
             choices: [
-                'View Department', 'Add Department', 'Remove Department',
-                'View Role', 'Add Role', 'Remove Role',
-                'View Employee', 'Add Employee', 'Remove Employee',
+                'View Department', 'Add Department', 
+                'View Role', 'Add Role', 
+                'View Employee', 'Add Employee', 
                 "Exit"
             ]
         },
@@ -44,9 +44,15 @@ function init() {
         }
         else if (response.DepartmentQuestions === 'View Employee') {
             viewEmployee();
-        } 
+        }
         else if (response.DepartmentQuestions === 'Add Department') {
             addDepartment();
+        }
+        else if (response.DepartmentQuestions === 'Add Role') {
+            addRole();
+        }
+        else if (response.DepartmentQuestions === 'Add Employee') {
+            addEmployee();
         }
         else {
             console.log("See you again !!!");
@@ -114,11 +120,103 @@ function addDepartment() {
 
         const sql = `INSERT INTO department SET ?`;
 
-        db.query(sql, {name: response.departName},  (err, rows) => {
+        db.query(sql, { name: response.departName }, (err, rows) => {
             if (err) {
                 console.log(err.message);
             }
             console.log(`Added ${response.departName} to database`);
+
+            //call init again 
+            init();
+        });
+    });
+}
+
+function addRole() {
+    inquirer.prompt([
+        {
+            name: "addRole",
+            type: "input",
+            message: "What is the name of the role?",
+        }, 
+        {
+            name: "addSalary",
+            type: "input",
+            message: "What is the salary amount?",
+        },
+        {
+            name: "addDepartment",
+            type: "input",
+            message: "What is the department ID?",
+        },
+
+    ]).then(response => {
+
+        const sql = `INSERT INTO role SET ?`;
+        console.log(sql, { 
+            title: response.addRole, 
+            salary: response.addSalary, 
+            department_id: response.addDepartment
+          }); 
+          
+        db.query(sql, { 
+            title: response.addRole, 
+            salary: response.addSalary, 
+            department_id: response.addDepartment
+          }, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            console.log(`Added ${response.addRole} to database`);
+
+            //call init again 
+            init();
+        });
+    });
+}
+
+function addEmployee() {
+    inquirer.prompt([
+        {
+            name: "addEmployee",
+            type: "input",
+            message: "What is the first name of the employee?",
+        }, 
+        {
+            name: "addLastName",
+            type: "input",
+            message: "What is the last name of the employee",
+        },
+        {
+            name: "addRoleId",
+            type: "input",
+            message: "What is the role ID for  the employee?",
+        },
+        {
+            name: "addManagerId",
+            type: "input",
+            message: "What is the manager ID?",
+        },
+
+    ]).then(response => {
+
+        //Incase of adding a manager setting the value to NULL 
+        if(response.addManagerId === '') {
+            response.addManagerId = null; 
+        }
+        const sql = `INSERT INTO employee SET ?`;
+       
+          
+        db.query(sql, { 
+            first_name: response.addEmployee, 
+            last_name: response.addLastName, 
+            role_id: response.addRoleId, 
+            manager_id: response.addManagerId
+          }, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            console.log(`Added ${response.addEmployee} to database`);
 
             //call init again 
             init();
