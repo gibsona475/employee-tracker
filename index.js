@@ -34,29 +34,94 @@ function init() {
             ]
         },
     ]).then(response => {
-        console.log("your choice is", response.DepartmentQuestions);
+        // console.log("your choice is", response.DepartmentQuestions);
         //SWICTH OR IF ELSEIF 
-        if(response.DepartmentQuestions === 'View Department') {
-            viewDepartment(); 
+        if (response.DepartmentQuestions === 'View Department') {
+            viewDepartment();
         }
-        
-    }); 
+        else if (response.DepartmentQuestions === 'View Role') {
+            viewRole();
+        }
+        else if (response.DepartmentQuestions === 'View Employee') {
+            viewEmployee();
+        } 
+        else if (response.DepartmentQuestions === 'Add Department') {
+            addDepartment();
+        }
+        else {
+            console.log("See you again !!!");
+            process.exit(0);
+        }
+    });
 
 }
 
 init();
 
 
-function viewDepartment(){
+function viewDepartment() {
     const sql = `SELECT id, name AS Department FROM department`;
-  
-  db.query(sql, (err, rows) => {
-    if (err) {
-     console.log(err.message); 
-    }
-    console.table(rows);
 
-    //call init again 
-    init(); 
-  });
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+        }
+        console.table(rows);
+
+        //call init again 
+        init();
+    });
+}
+
+function viewRole() {
+    const sql = `SELECT role.id , role.title, role.salary,  department.name as 'Department Name' FROM role 
+    LEFT JOIN department ON department.id = role.department_id`;
+
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+        }
+        console.table(rows);
+
+        //call init again 
+        init();
+    });
+}
+
+function viewEmployee() {
+    const sql = `SELECT employee.id , first_name as 'First Name' , last_name as 'Last Name', role.title as 'Title', role.salary as 'Salary', manager_id as 'Manager ID'  
+    from employee JOIN role ON role.id = employee.role_id `;
+
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+        }
+        console.table(rows);
+
+        //call init again 
+        init();
+    });
+}
+
+function addDepartment() {
+    inquirer.prompt([
+        {
+            name: "departName",
+            type: "input",
+            message: "What id the name of the department?",
+        },
+    ]).then(response => {
+
+        const sql = `INSERT INTO department SET ?`;
+
+        db.query(sql, {name: response.departName},  (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            console.log(`Added ${response.departName} to database`);
+
+            //call init again 
+            init();
+        });
+    });
 }
